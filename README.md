@@ -34,7 +34,7 @@ A Flask-based web application designed to control a robot built with Raspberry P
 
 1. Clone this repository on your Raspberry Pi:
 ```bash
-git clone [repository-url](https://github.com/juanjopb/raspberrypi-robot-follow-line)
+git clone https://github.com/juanjopb/raspberrypi-robot-follow-line
 ```
 2. Install required dependencies:
 ```bash
