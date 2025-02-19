@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Robot Control</title>
+    <style>
+        body {
+            text-align: center;
+            font-family: Arial;
+            background-color: #f0f0f0;
+        }
+        .control-panel {
+            margin: 20px auto;
+            width: 300px;
+            padding: 20px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        .log-panel {
+            margin: 20px auto;
+            width: 500px;
+            padding: 20px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        #log-container {
+            height: 200px;
+            overflow-y: auto;
+            text-align: left;
+            padding: 10px;
+            background-color: #f8f8f8;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            font-family: monospace;
+            margin-top: 10px;
+        }
+        .log-entry {
+            padding: 3px 0;
+            border-bottom: 1px solid #eee;
+            font-size: 14px;
+        }
+        button {
+            width: 80px;
+            height: 80px;
+            margin: 5px;
+            font-size: 16px;
+            border: none;
+            border-radius: 10px;
+            background-color: #4CAF50;
+            color: white;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        #stop {
+            background-color: #ff4444;
+        }
+        #stop:hover {
+            background-color: #cc0000;
+        }
+        #follow {
+            width: 200px;
+            background-color: #0099ff;
+        }
+        #follow:hover {
+            background-color: #0077cc;
+        }
+    </style>
+</head>
+<body>
+    <div class="control-panel">
+        <h1>Robot Control Panel</h1>
+        
+        <!-- Forward button -->
+        <button onclick="sendCommand('forward')">↑<br>Forward</button><br>
+        
+        <!-- Left, Stop, and Right buttons -->
+        <button onclick="sendCommand('left')">←<br>Left</button>
+        <button id="stop" onclick="sendCommand('stop')">Stop</button>
+        <button onclick="sendCommand('right')">→<br>Right</button><br>
+        
+        <!-- Backward button -->
+        <button onclick="sendCommand('backward')">↓<br>Back</button><br>
+        
+        <!-- Line following button -->
+        <button id="follow" onclick="sendCommand('follow')">Follow Line</button>
+    </div>
+
+    <div class="log-panel">
+        <h2>Robot Activity Log</h2>
+        <div id="log-container">
+            <div id="logs"></div>
+        </div>
+    </div>
+
+    <script>
+        function sendCommand(command) {
+            fetch('/' + command)
+                .then(response => console.log('Command sent: ' + command))
+                .catch(error => console.error('Error:', error));
+        }
+
+        // Set up event source for log streaming
+        const eventSource = new EventSource('/stream_logs');
+        const logsDiv = document.getElementById('logs');
+        
+        eventSource.onmessage = function(event) {
+            const newLogs = JSON.parse(event.data);
+            newLogs.forEach(log => {
+                const logLine = document.createElement('div');
+                logLine.className = 'log-entry';
+                logLine.textContent = log;
+                logsDiv.appendChild(logLine);
+            });
+            
+            // Auto-scroll to bottom
+            const container = document.getElementById('log-container');
+            container.scrollTop = container.scrollHeight;
+        };
+
+        // Handle connection errors
+        eventSource.onerror = function(error) {
+            console.error('EventSource failed:', error);
+            eventSource.close();
+        };
+    </script>
+</body>
+</html>
